@@ -1,33 +1,91 @@
+import * as React from "react";
+import { useState } from "react";
+import { Input } from "./components/form/Input";
+import { Checkbox } from "./components/form/Checkbox";
+import { ProductCategoryRow } from "./components/form/products/ProductCategoryRow";
+import ProductRow from "./components/form/products/ProductRow";
+import "./App.css";
 
-const title = 'React n00BZ!'
-const style = { color: 'red' }
-const showTitle = true
-const todos = ['Learn React', 'Learn Redux', 'Learn React Router']
-
-const handleClick = (e) => {
-  alert('YO!')
-  console.table(e)
-}
-
+const PRODUCTS = [
+  { category: "Fruits", price: "$1", stocked: true, name: "Apple" },
+  { category: "Fruits", price: "$1", stocked: true, name: "Dragonfruit" },
+  { category: "Fruits", price: "$2", stocked: false, name: "Passionfruit" },
+  { category: "Vegetables", price: "$2", stocked: true, name: "Spinach" },
+  { category: "Vegetables", price: "$4", stocked: false, name: "Pumpkin" },
+  { category: "Vegetables", price: "$1", stocked: true, name: "Peas" },
+];
 
 function App() {
-  return <>
-    <Title color="blue" id="customID" className="customCLass">MY CUSTOM CHILDREN TITULO</Title>
-    <p style={style}>Este é um parágrafo.</p>
-    <button onClick={handleClick} >CLICK !</button>
-    <ul>
-      {todos.map((todo, index) => <li key={index}>{index} - {todo}</li>)}
-    </ul>
-  </>  
+  const [showStockedOnly, setShowStockedOnly] = useState(false);
+  const [search, setSearch] = useState('')
+
+  return (
+    <div className="flex items-center flex-col m-8">
+      <SearchBar
+        showStockedOnly={showStockedOnly}
+        onChangeShowStockedOnly={setShowStockedOnly}
+        search={search}
+        onChangeSearch={setSearch}
+      />
+      <ProductTable productList={PRODUCTS} showStockedOnly={showStockedOnly} search={search} />
+    </div>
+  );
 }
 
-function Title({color, children, hidden, ...props}) {
-  if(hidden){return null}
+function SearchBar({ showStockedOnly, onChangeShowStockedOnly, search, onChangeSearch }) {
 
-  return <>
-  {showTitle? <h1 style={{color:color}} {...props} >OLA! {title} {children} </h1> : <h1> -- </h1>}
-  </>
+  return (
+    <div>
+      <Input 
+        placeholder="Search..." 
+        value={search} 
+        onChange={onChangeSearch} 
+      />
+      <Checkbox
+        checked={showStockedOnly}
+        id="stocked"
+        onChange={onChangeShowStockedOnly}
+        label="Only show products in stock"
+      />
+    </div>
+  );
 }
 
-export default App
+function ProductTable({ productList, showStockedOnly, search }) {
+  const rows = [];
+  let lastCategory = null;
 
+  for (let product of PRODUCTS) {
+    if(search && product.name.toLowerCase().includes(search.toLowerCase()) || !search){
+      if (product.category != lastCategory) {
+        lastCategory = product.category;
+        rows.push(
+          <ProductCategoryRow key={product.category} name={product.category} />
+        );
+      }
+      if(showStockedOnly && product.stocked || !showStockedOnly) {
+        rows.push(<ProductRow key={product.name} product={product} />);
+      }
+    }
+  }
+
+  
+  return (
+    <div className="p-4">
+      <table>
+        <thead className="bg-cyan-100">
+          <tr className="underline border-2 border-cyan-700">
+            <th className="text-center p-2">Name</th>
+            <th className="border-x-2 border-cyan-700 text-center p-2">
+              Price
+            </th>
+            <th className="text-center p-2">Stock</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
+  );
+}
+
+export default App;
