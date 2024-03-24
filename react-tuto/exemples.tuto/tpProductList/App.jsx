@@ -1,4 +1,4 @@
-// course solution
+// course
 import * as React from "react";
 import { useState } from "react";
 import { Input } from "./components/form/Input";
